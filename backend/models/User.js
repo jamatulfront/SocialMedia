@@ -92,8 +92,10 @@ const userSchema = mongoose.Schema(
         post: {
           type: mongoose.SchemaTypes.ObjectId,
           ref: "Post",
-          saveAt: Date,
-          default: Date.now,
+          saveAt: {
+            type: Date,
+            default: Date.now,
+          },
         },
       },
     ],

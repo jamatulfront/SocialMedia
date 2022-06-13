@@ -31,32 +31,27 @@ exports.register = async (req, res) => {
     if (!validateLength(first_name, 4, 20)) {
       return res.status(400).json({
         status: "error",
-        msg: "firstname should be in between 4 and 20 characters",
+        msg: "Firstname should be in between 4 and 20 Characters",
       });
     }
     if (!validateLength(last_name, 4, 20)) {
       return res.status(400).json({
         status: "error",
-        msg: "lastname should be in between 4 and 20 characters",
-      });
-    }
-    if (!validateLength(username, 4, 40)) {
-      return res.status(400).json({
-        status: "error",
-        msg: "username should be in between 4 and 40 characters",
+        msg: "Lastname should be in between 4 and 20 characters",
       });
     }
     if (!validateLength(password, 8, 40)) {
       return res.status(400).json({
         status: "error",
-        msg: "password should be in between 8 and 40 characters",
+        msg: "Password should be in between 8 and 40 characters",
       });
     }
     let check = await User.findOne({ email });
     if (check) {
-      return res
-        .status(400)
-        .json({ status: "error", msg: "Please try with another email !" });
+      return res.status(400).json({
+        status: "error",
+        msg: "There is already an account with this email !",
+      });
     }
     username = await generateValidUsername(first_name, last_name);
     password = await bcrypt.hash(password, 12);
@@ -90,9 +85,11 @@ exports.register = async (req, res) => {
       last_name: user.last_name,
       token,
       verified: user.verified,
-      message: "Register Success ! please activate your email to start",
+      message:
+        "Your Registration is completed ! Please activate your email before you start using Facebook.",
     });
   } catch (error) {
+    console.log(error);
     return res.status(400).json({ status: "error", msg: error.message });
   }
 };
@@ -122,11 +119,11 @@ exports.login = async (req, res) => {
     if (!user) {
       return res
         .status(400)
-        .json({ msg: "Sorry there is no account with this email" });
+        .json({ msg: "Sorry, there is no account with this email" });
     }
     let verifyPassword = await bcrypt.compare(password, user.password);
     if (!verifyPassword)
-      return res.status(400).json({ msg: "Invalid crediantials" });
+      return res.status(400).json({ msg: "Your password is wrong !" });
     const token = generateToken({ id: user._id.toString() }, "7d");
     return res.send({
       id: user._id,
@@ -136,7 +133,6 @@ exports.login = async (req, res) => {
       last_name: user.last_name,
       token,
       verified: user.verified,
-      message: "Account is login successfully",
     });
   } catch (error) {
     return res.status(400).json({ status: "error", msg: error.message });
